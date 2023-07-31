@@ -1,3 +1,5 @@
+''' Notebook 'case_study_2.ipynb' as Python script '''
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
