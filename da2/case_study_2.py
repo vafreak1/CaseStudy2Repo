@@ -338,7 +338,7 @@ class MyEntryLayer(nn.Module):
 
         self.out_channels = out_channels
 
-        # Called for residual learning in forward pass
+        # Called on original input to enable residual learning in forward pass
         self.proj_out = nn.Conv2d(in_channels, out_channels[len(out_channels)-1], (1,1))
 
         # Appends a new entry block for each new out_channel to ModuleList()
@@ -367,7 +367,7 @@ class MySepConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel, **kwargs):
         super().__init__()
 
-        # Called for residual learning in forward pass
+        # Called on original input to enable residual learning in forward pass
         if in_channels == out_channels:
             self.proj_out = nn.Identity()
         else:
@@ -378,7 +378,7 @@ class MySepConvLayer(nn.Module):
             nn.Conv2d(in_channels, in_channels, kernel, groups=in_channels, **kwargs), # Depthwise SepConv
             nn.Conv2d(in_channels, out_channels, (1,1), **kwargs), # Pointwise SepConv
             nn.BatchNorm2d(out_channels),
-            nn.PReLU(), # [M]
+            nn.PReLU(), # [M] changed position compared to Lang et al. (2019)
             nn.Dropout2d(p=0.5), # [M] Supported us in our constant struggle against overfitting
             nn.Conv2d(in_channels, in_channels, kernel, groups=in_channels, **kwargs), # Performs second SepConv, see Lang et al. (2019), p. 6
             nn.Conv2d(in_channels, out_channels, (1,1), **kwargs),
@@ -588,5 +588,8 @@ for i in range(10): #Iterate over the 10 test images
             
     pred = np.expand_dims(pred, axis=0) #Add empty dimension in front (1x1024x1024)
     np.save(f"test_images/prediction_00{i}.npy", pred) #Save to file
-    
 
+
+# Sources
+# Lang, N., Schindler, K., & Wegner, J. D. (2019). Country-wide high-resolution vegetation height mapping with Sentinel-2. 
+# Remote Sensing of Environment, 233: 111347. https://doi.org/10.1016/j.rse.2019.111347
